@@ -25,6 +25,8 @@
 #include "bricklib2/protocols/tfp/tfp.h"
 #include "bricklib2/utility/callback_value.h"
 
+#include "ina226.h"
+
 CallbackValue callback_value_current;
 CallbackValue callback_value_voltage;
 CallbackValue callback_value_power;
@@ -92,10 +94,9 @@ void communication_tick(void) {
 }
 
 void communication_init(void) {
-	// TODO: Add proper functions
-	callback_value_init(&callback_value_current, NULL);;
-	callback_value_init(&callback_value_voltage, NULL);;
-	callback_value_init(&callback_value_power, NULL);;
+	callback_value_init(&callback_value_current, ina226_get_current);
+	callback_value_init(&callback_value_voltage, ina226_get_voltage);
+	callback_value_init(&callback_value_power, ina226_get_power);
 
 	communication_callback_init();
 }

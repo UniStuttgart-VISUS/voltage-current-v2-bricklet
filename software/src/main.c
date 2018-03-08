@@ -28,15 +28,18 @@
 #include "bricklib2/hal/system_timer/system_timer.h"
 #include "bricklib2/logging/logging.h"
 #include "communication.h"
+#include "ina226.h"
 
 int main(void) {
 	logging_init();
 	logd("Start Voltage Current V2 Bricklet\n\r");
 
 	communication_init();
+	ina226_init();
 
 	while(true) {
 		bootloader_tick();
 		communication_tick();
+		ina226_tick();
 	}
 }
