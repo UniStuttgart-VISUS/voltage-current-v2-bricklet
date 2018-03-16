@@ -119,7 +119,7 @@ void ina226_tick(void) {
 					}
 
 					case INA226_STATE_READ_CURRENT: {
-						ina226.current = ((buffer[0] << 8) | buffer[1])*INA226_CURRENT_40OHM_MUL/INA226_CURRENT_40OHM_DIV*1000/1325;
+						ina226.current = ((buffer[0] << 8) | buffer[1])*INA226_CURRENT_40OHM_MUL/INA226_CURRENT_40OHM_DIV;
 						ina226.power   = ina226.voltage * ina226.current / 1000;
 						ina226.state = INA226_STATE_READ_MASK;
 						logd("current: %d\n\r", ina226.current);
