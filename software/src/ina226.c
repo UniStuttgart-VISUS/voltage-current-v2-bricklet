@@ -1,5 +1,6 @@
 /* voltage-current-v2-bricklet
  * Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2018 Ishraq Ibne Ashraf <ishraq@tinkerforge.com>
  *
  * ina226.c: INA226 driver
  *
@@ -23,21 +24,55 @@
 
 #include "configs/config_ina226.h"
 #include "bricklib2/logging/logging.h"
+#include "bricklib2/bootloader/bootloader.h"
 
 #include <string.h>
 
-#define INA226_CURRENT_40OHM_MUL 5
-#define INA226_CURRENT_40OHM_DIV 8
-#define INA226_VOLTAGE_MUL 5
-#define INA226_VOLTAGE_DIV 4
-
 INA226 ina226;
 
+void calibration_eeprom_write(void) {
+	logd("[+] VC2: calibration_eeprom_write()\n\r");
 
-// TODO:
-//  * Add calibration
-//  * Implement API
-//  * Remove debug
+	uint32_t page[EEPROM_PAGE_SIZE/sizeof(uint32_t)];
+
+	page[CALIBRATION_MAGIC_POS] = CALIBRATION_MAGIC;
+	page[CALIBRATION_V_MULTIPLIER_POS] = ina226.cal_v_multiplier;
+	page[CALIBRATION_V_DIVISOR_POS] = ina226.cal_v_divisor;
+	page[CALIBRATION_C_MULTIPLIER_POS] = ina226.cal_c_multiplier;
+	page[CALIBRATION_C_DIVISOR_POS] = ina226.cal_c_divisor;
+
+	if(!bootloader_write_eeprom_page(CALIBRATION_PAGE, page)) {
+		// TODO: Error handling?
+		return;
+	}
+}
+
+void calibration_eeprom_read(void) {
+	logd("[+] VC2: calibration_read()\n\r");
+
+	uint32_t page[EEPROM_PAGE_SIZE/sizeof(uint32_t)];
+
+	bootloader_read_eeprom_page(CALIBRATION_PAGE, page);
+
+	// The magic number is not where it is supposed to be.
+	// This is either our first startup or something went wrong.
+	// We initialize the calibration data with sane default values.
+	if(page[0] != CALIBRATION_MAGIC) {
+		ina226.cal_v_multiplier = 1;
+		ina226.cal_v_divisor = 1;
+		ina226.cal_c_multiplier = 1;
+		ina226.cal_c_divisor = 1;
+
+		calibration_eeprom_write();
+
+		return;
+	}
+
+	ina226.cal_v_multiplier = page[CALIBRATION_V_MULTIPLIER_POS];
+	ina226.cal_v_divisor = page[CALIBRATION_V_DIVISOR_POS];
+	ina226.cal_c_multiplier = page[CALIBRATION_C_MULTIPLIER_POS];
+	ina226.cal_c_divisor = page[CALIBRATION_C_DIVISOR_POS];
+}
 
 static void ina226_write_register_be(const uint8_t reg, const uint16_t value) {
 	uint8_t value_be[2];
@@ -48,6 +83,8 @@ static void ina226_write_register_be(const uint8_t reg, const uint16_t value) {
 }
 
 void ina226_init(void) {
+	logd("[+] VC2: ina226_init()\n\r");
+
 	memset(&ina226, 0, sizeof(INA226));
 
 	ina226.averaging                 = INA226_DEFAULT_AVERAGING;
@@ -73,6 +110,13 @@ void ina226_init(void) {
 	ina226.i2c_fifo.sda_source       = INA226_SDA_SOURCE;
 	ina226.i2c_fifo.sda_fifo_size    = INA226_SDA_FIFO_SIZE;
 	ina226.i2c_fifo.sda_fifo_pointer = INA226_SDA_FIFO_POINTER;
+
+	ina226.cal_v_multiplier = 1;
+	ina226.cal_v_divisor = 1;
+	ina226.cal_c_multiplier = 1;
+	ina226.cal_c_divisor = 1;
+
+	calibration_eeprom_read();
 
 	i2c_fifo_init(&ina226.i2c_fifo);
 
@@ -112,23 +156,23 @@ void ina226_tick(void) {
 
 				switch(ina226.state) {
 					case INA226_STATE_READ_VOLTAGE: {
-						ina226.voltage = ((buffer[0] << 8) | buffer[1])*INA226_VOLTAGE_MUL/INA226_VOLTAGE_DIV;
+						ina226.voltage = ((((buffer[0] << 8) | buffer[1]) * VOLTAGE_ADC_MV_MUL) / VOLTAGE_ADC_MV_DIV) * ina226.cal_v_multiplier / ina226.cal_v_divisor;
 						ina226.state = INA226_STATE_READ_CURRENT;
-						logd("voltage: %d\n\r", ina226.voltage);
+						//logd("voltage: %d\n\r", ina226.voltage);
 						break;
 					}
 
 					case INA226_STATE_READ_CURRENT: {
-						ina226.current = ((buffer[0] << 8) | buffer[1])*INA226_CURRENT_40OHM_MUL/INA226_CURRENT_40OHM_DIV;
-						ina226.power   = ina226.voltage * ina226.current / 1000;
+						ina226.current = ((((buffer[0] << 8) | buffer[1]) * CURRENT_ADC_MA_MUL) / CURRENT_ADC_MA_DIV) * ina226.cal_c_multiplier / ina226.cal_c_divisor;
+						ina226.power = (ina226.voltage * ina226.current) / 1000;
 						ina226.state = INA226_STATE_READ_MASK;
-						logd("current: %d\n\r", ina226.current);
+						//logd("current: %d\n\r", ina226.current);
 						break;
 					}
 
 					case INA226_STATE_READ_MASK: {
 						ina226.state = INA226_STATE_WAIT_FOR_ALERT;
-						logd("mask: %d\n\r", (buffer[0] << 8) | buffer[1]);
+						//logd("mask: %d\n\r", (buffer[0] << 8) | buffer[1]);
 						break;
 					}
 
@@ -171,10 +215,11 @@ void ina226_tick(void) {
 			ina226_write_register_be(INA226_REG_CALIBRATION, 2048);
 			ina226.new_calibration = false;
 		} else if(ina226.new_configuration) {
-			ina226_write_register_be(INA226_REG_CONFIGURATION, INA226_CONF_AVERAGING(ina226.averaging) |
-	                                                           INA226_CONF_CONVERSION_BV(ina226.voltage_conversion_time) |
-                                                               INA226_CONF_CONVERSION_SV(ina226.current_conversion_time) |
-                                                               INA226_CONF_OPERATING_MODE(INA226_DEFAULT_OPERATING_MODE));
+			ina226_write_register_be(INA226_REG_CONFIGURATION,
+			                         (INA226_CONF_AVERAGING(ina226.averaging) |
+			                          INA226_CONF_CONVERSION_BV(ina226.voltage_conversion_time) |
+			                          INA226_CONF_CONVERSION_SV(ina226.current_conversion_time) |
+			                          INA226_CONF_OPERATING_MODE(INA226_DEFAULT_OPERATING_MODE)));
 			ina226.new_configuration = false;
 		} else if(ina226.new_mask) {
 			ina226_write_register_be(INA226_REG_MASK_ENABLE, INA226_MASK_CONVERSION_READY);

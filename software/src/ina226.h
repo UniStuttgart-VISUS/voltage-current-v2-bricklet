@@ -1,5 +1,6 @@
 /* voltage-current-v2-bricklet
  * Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2018 Ishraq Ibne Ashraf <ishraq@tinkerforge.com>
  *
  * ina226.h: INA226 driver
  *
@@ -26,45 +27,23 @@
 
 #include <stdint.h>
 
-typedef enum {
-	INA226_STATE_READ_VOLTAGE,
-	INA226_STATE_READ_CURRENT,
-	INA226_STATE_READ_MASK,
-	INA226_STATE_WAIT_FOR_ALERT,
-} INA226State;
+#define CALIBRATION_PAGE 1
+#define CALIBRATION_MAGIC 0x12345678
+#define CALIBRATION_MAGIC_POS 0
+#define CALIBRATION_V_MULTIPLIER_POS 1
+#define CALIBRATION_V_DIVISOR_POS 2
+#define CALIBRATION_C_MULTIPLIER_POS 3
+#define CALIBRATION_C_DIVISOR_POS 4
 
-typedef struct {
-	int32_t voltage;
-	int32_t current;
-	int32_t power;
-	bool new_calibration;
-	bool new_configuration;
-	bool new_mask;
-
-	uint8_t averaging;
-	uint8_t voltage_conversion_time;
-	uint8_t current_conversion_time;
-
-	I2CFifo i2c_fifo;
-	INA226State state;
-} INA226;
-
-//extern INA226 ina226;
-
-void ina226_init(void);
-void ina226_tick(void);
-
-int32_t ina226_get_voltage(void);
-int32_t ina226_get_current(void);
-int32_t ina226_get_power(void);
-
-
-#define CURRENT_40OHM_MUL 5
-#define CURRENT_40OHM_DIV 8
-#define VOLTAGE_MUL 5
-#define VOLTAGE_DIV 4
-
-#define CALIBRATION_EEPROM_POSITION (BRICKLET_PLUGIN_MAX_SIZE + 96)
+/*
+ * The following multipliers and divisors are used
+ * to convert the raw digital current and voltage
+ * readings to to mA and mV readings respectively.
+ */
+#define CURRENT_ADC_MA_MUL 5
+#define CURRENT_ADC_MA_DIV 8
+#define VOLTAGE_ADC_MV_MUL 5
+#define VOLTAGE_ADC_MV_DIV 4
 
 #define INA226_REG_CONFIGURATION 0x00
 #define INA226_REG_SHUNT_VOLTAGE 0x01
@@ -97,5 +76,45 @@ int32_t ina226_get_power(void);
 #define INA226_MASK_MATH_OVERFLOW_FLAG     1 << 2
 #define INA226_MASK_ALERT_POLARITY         1 << 1
 #define INA226_MASK_ALTER_LATCH_ENABLE     1 << 0
+
+typedef enum {
+	INA226_STATE_READ_VOLTAGE,
+	INA226_STATE_READ_CURRENT,
+	INA226_STATE_READ_MASK,
+	INA226_STATE_WAIT_FOR_ALERT,
+} INA226State;
+
+typedef struct {
+	int32_t voltage;
+	int32_t current;
+	int32_t power;
+	bool new_calibration;
+	bool new_configuration;
+	bool new_mask;
+
+	uint16_t cal_v_multiplier;
+	uint16_t cal_v_divisor;
+	uint16_t cal_c_multiplier;
+	uint16_t cal_c_divisor;
+
+	uint8_t averaging;
+	uint8_t voltage_conversion_time;
+	uint8_t current_conversion_time;
+
+	I2CFifo i2c_fifo;
+	INA226State state;
+} INA226;
+
+extern INA226 ina226;
+
+void ina226_init(void);
+void ina226_tick(void);
+
+int32_t ina226_get_voltage(void);
+int32_t ina226_get_current(void);
+int32_t ina226_get_power(void);
+
+void calibration_eeprom_read(void);
+void calibration_eeprom_write(void);
 
 #endif

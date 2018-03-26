@@ -1,5 +1,6 @@
 /* voltage-current-v2-bricklet
  * Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2018 Ishraq Ibne Ashraf <ishraq@tinkerforge.com>
  *
  * communication.c: TFP protocol message handling
  *
@@ -24,6 +25,7 @@
 #include "bricklib2/utility/communication_callback.h"
 #include "bricklib2/protocols/tfp/tfp.h"
 #include "bricklib2/utility/callback_value.h"
+#include "bricklib2/logging/logging.h"
 
 #include "ina226.h"
 
@@ -51,31 +53,56 @@ BootloaderHandleMessageResponse handle_message(const void *message, void *respon
 	}
 }
 
-
 BootloaderHandleMessageResponse set_configuration(const SetConfiguration *data) {
+	logd("[+] VC2: set_configuration()\n\r");
+
+	ina226.averaging = data->averaging;
+	ina226.voltage_conversion_time = data->voltage_conversion_time;
+	ina226.current_conversion_time = data->current_conversion_time;
+	ina226.new_configuration = true;
 
 	return HANDLE_MESSAGE_RESPONSE_EMPTY;
 }
 
 BootloaderHandleMessageResponse get_configuration(const GetConfiguration *data, GetConfiguration_Response *response) {
+	logd("[+] VC2: get_configuration()\n\r");
+
 	response->header.length = sizeof(GetConfiguration_Response);
+	response->averaging = ina226.averaging;
+	response->voltage_conversion_time = ina226.voltage_conversion_time;
+	response->current_conversion_time = ina226.current_conversion_time;
 
 	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
 }
 
 BootloaderHandleMessageResponse set_calibration(const SetCalibration *data) {
+	logd("[+] VC2: set_calibration()\n\r");
+
+	if(data->voltage_divisor == 0 || data->current_divisor == 0) {
+		return HANDLE_MESSAGE_RESPONSE_INVALID_PARAMETER;
+	}
+
+	ina226.cal_v_multiplier = data->voltage_multiplier;
+	ina226.cal_v_divisor = data->voltage_divisor;
+	ina226.cal_c_multiplier = data->current_multiplier;
+	ina226.cal_c_divisor = data->current_divisor;
+
+	calibration_eeprom_write();
 
 	return HANDLE_MESSAGE_RESPONSE_EMPTY;
 }
 
 BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetCalibration_Response *response) {
+	logd("[+] VC2: get_calibration()\n\r");
+
 	response->header.length = sizeof(GetCalibration_Response);
+	response->voltage_multiplier = ina226.cal_v_multiplier;
+	response->voltage_divisor = ina226.cal_v_divisor;
+	response->current_multiplier = ina226.cal_c_multiplier;
+	response->current_divisor = ina226.cal_c_divisor;
 
 	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
 }
-
-
-
 
 bool handle_current_callback(void) {
 	return handle_callback_value_callback(&callback_value_current, FID_CALLBACK_CURRENT);

@@ -1,5 +1,6 @@
 /* voltage-current-v2-bricklet
  * Copyright (C) 2018 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2018 Ishraq Ibne Ashraf <ishraq@tinkerforge.com>
  *
  * communication.h: TFP protocol message handling
  *
@@ -106,8 +107,10 @@ typedef struct {
 
 typedef struct {
 	TFPMessageHeader header;
-	uint16_t gain_multiplier;
-	uint16_t gain_divisor;
+	uint16_t voltage_multiplier;
+	uint16_t voltage_divisor;
+	uint16_t current_multiplier;
+	uint16_t current_divisor;
 } __attribute__((__packed__)) SetCalibration;
 
 typedef struct {
@@ -116,8 +119,10 @@ typedef struct {
 
 typedef struct {
 	TFPMessageHeader header;
-	uint16_t gain_multiplier;
-	uint16_t gain_divisor;
+	uint16_t voltage_multiplier;
+	uint16_t voltage_divisor;
+	uint16_t current_multiplier;
+	uint16_t current_divisor;
 } __attribute__((__packed__)) GetCalibration_Response;
 
 
