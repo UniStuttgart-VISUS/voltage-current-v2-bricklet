@@ -1,0 +1,28 @@
+Needs["NETLink`"]
+LoadNETAssembly["Tinkerforge",NotebookDirectory[]<>"../../.."]
+
+host="localhost"
+port=4223
+uid="XYZ"(*Change XYZ to the UID of your Voltage/Current Bricklet 2.0*)
+
+(*Create IPConnection and device object*)
+ipcon=NETNew["Tinkerforge.IPConnection"]
+vc=NETNew["Tinkerforge.BrickletVoltageCurrentV2",uid,ipcon]
+ipcon@Connect[host,port]
+
+(*Callback function for power callback*)
+PowerCB[sender_,power_]:=
+ Print["power: "<>ToString[N[Quantity[power,"W/1000"]]]]
+AddEventHandler[vc@PowerCallback,PowerCB]
+
+(*Configure threshold for power "greater than 10 W"*)
+(*with a debounce period of 1s (1000ms)*)
+option=Tinkerforge`BrickletVoltageCurrentV2`THRESHOLDUOPTIONUGREATER
+vc@SetPowerCallbackConfiguration[1000,False,option,10*1000,0]
+
+Input["Click OK to exit"]
+
+(*Clean up*)
+ipcon@Disconnect[]
+ReleaseNETObject[vc]
+ReleaseNETObject[ipcon]

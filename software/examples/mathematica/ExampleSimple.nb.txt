@@ -1,0 +1,22 @@
+Needs["NETLink`"]
+LoadNETAssembly["Tinkerforge",NotebookDirectory[]<>"../../.."]
+
+host="localhost"
+port=4223
+uid="XYZ"(*Change XYZ to the UID of your Voltage/Current Bricklet 2.0*)
+
+(*Create IPConnection and device object*)
+ipcon=NETNew["Tinkerforge.IPConnection"]
+vc=NETNew["Tinkerforge.BrickletVoltageCurrentV2",uid,ipcon]
+ipcon@Connect[host,port]
+
+(*Get current voltage*)
+Print["Voltage: "<>ToString[N[Quantity[vc@GetVoltage[],"V/1000"]]]]
+
+(*Get current current*)
+Print["Current: "<>ToString[N[Quantity[vc@GetCurrent[],"A/1000"]]]]
+
+(*Clean up*)
+ipcon@Disconnect[]
+ReleaseNETObject[vc]
+ReleaseNETObject[ipcon]
