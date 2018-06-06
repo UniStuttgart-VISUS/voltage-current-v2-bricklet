@@ -29,22 +29,21 @@
 
 #include "ina226.h"
 
-CallbackValue callback_value_current;
-CallbackValue callback_value_voltage;
-CallbackValue callback_value_power;
-
+CallbackValue_int32_t callback_value_current;
+CallbackValue_int32_t callback_value_voltage;
+CallbackValue_int32_t callback_value_power;
 
 BootloaderHandleMessageResponse handle_message(const void *message, void *response) {
 	switch(tfp_get_fid_from_message(message)) {
-		case FID_GET_CURRENT: return get_callback_value(message, response, &callback_value_current);
-		case FID_SET_CURRENT_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration(message, &callback_value_current);
-		case FID_GET_CURRENT_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration(message, response, &callback_value_current);
-		case FID_GET_VOLTAGE: return get_callback_value(message, response, &callback_value_voltage);
-		case FID_SET_VOLTAGE_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration(message, &callback_value_voltage);
-		case FID_GET_VOLTAGE_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration(message, response, &callback_value_voltage);
-		case FID_GET_POWER: return get_callback_value(message, response, &callback_value_power);
-		case FID_SET_POWER_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration(message, &callback_value_power);
-		case FID_GET_POWER_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration(message, response, &callback_value_power);
+		case FID_GET_CURRENT: return get_callback_value_int32_t(message, response, &callback_value_current);
+		case FID_SET_CURRENT_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration_int32_t(message, &callback_value_current);
+		case FID_GET_CURRENT_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration_int32_t(message, response, &callback_value_current);
+		case FID_GET_VOLTAGE: return get_callback_value_int32_t(message, response, &callback_value_voltage);
+		case FID_SET_VOLTAGE_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration_int32_t(message, &callback_value_voltage);
+		case FID_GET_VOLTAGE_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration_int32_t(message, response, &callback_value_voltage);
+		case FID_GET_POWER: return get_callback_value_int32_t(message, response, &callback_value_power);
+		case FID_SET_POWER_CALLBACK_CONFIGURATION: return set_callback_value_callback_configuration_int32_t(message, &callback_value_power);
+		case FID_GET_POWER_CALLBACK_CONFIGURATION: return get_callback_value_callback_configuration_int32_t(message, response, &callback_value_power);
 		case FID_SET_CONFIGURATION: return set_configuration(message);
 		case FID_GET_CONFIGURATION: return get_configuration(message, response);
 		case FID_SET_CALIBRATION: return set_calibration(message);
@@ -105,15 +104,15 @@ BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetC
 }
 
 bool handle_current_callback(void) {
-	return handle_callback_value_callback(&callback_value_current, FID_CALLBACK_CURRENT);
+	return handle_callback_value_callback_int32_t(&callback_value_current, FID_CALLBACK_CURRENT);
 }
 
 bool handle_voltage_callback(void) {
-	return handle_callback_value_callback(&callback_value_voltage, FID_CALLBACK_VOLTAGE);
+	return handle_callback_value_callback_int32_t(&callback_value_voltage, FID_CALLBACK_VOLTAGE);
 }
 
 bool handle_power_callback(void) {
-	return handle_callback_value_callback(&callback_value_power, FID_CALLBACK_POWER);
+	return handle_callback_value_callback_int32_t(&callback_value_power, FID_CALLBACK_POWER);
 }
 
 void communication_tick(void) {
@@ -121,9 +120,9 @@ void communication_tick(void) {
 }
 
 void communication_init(void) {
-	callback_value_init(&callback_value_current, ina226_get_current);
-	callback_value_init(&callback_value_voltage, ina226_get_voltage);
-	callback_value_init(&callback_value_power, ina226_get_power);
+	callback_value_init_int32_t(&callback_value_current, ina226_get_current);
+	callback_value_init_int32_t(&callback_value_voltage, ina226_get_voltage);
+	callback_value_init_int32_t(&callback_value_power, ina226_get_power);
 
 	communication_callback_init();
 }
