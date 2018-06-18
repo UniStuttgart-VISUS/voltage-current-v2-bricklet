@@ -29,7 +29,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:voltage-current-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -426,7 +425,7 @@ U 1 1 5A5CA30E
 P 1550 2450
 F 0 "C1" H 1600 2550 50  0000 L CNN
 F 1 "220pF" H 1600 2350 50  0000 L CNN
-F 2 "kicad-libraries:C0402E" H 1550 2450 60  0001 C CNN
+F 2 "kicad-libraries:C0402F" H 1550 2450 60  0001 C CNN
 F 3 "" H 1550 2450 60  0000 C CNN
 	1    1550 2450
 	1    0    0    -1  
