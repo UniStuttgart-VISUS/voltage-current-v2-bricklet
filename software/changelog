@@ -4,5 +4,5 @@
 2018-10-04: 2.0.1 (2fbb9bb)
 - Fix race condition with potential buffer overflow (through bricklib2)
 
-2018-11-07: 2.0.2 (<unknown>)
+2018-11-07: 2.0.2 (d6e9f3b)
 - Fix two's complement handling for negative current measurement
