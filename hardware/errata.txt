@@ -1,0 +1,2 @@
+change shunt resistor to IC connection. Should be connected to the inner
+R pads.
