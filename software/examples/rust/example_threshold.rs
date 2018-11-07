@@ -12,10 +12,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     ipcon.connect((HOST, PORT)).recv()??; // Connect to brickd.
                                           // Don't use device before ipcon is connected.
 
-    // Create receiver for power events.
-    let power_receiver = vc.get_power_receiver();
+    let power_receiver = vc.get_power_callback_receiver();
 
-    // Spawn thread to handle received events. This thread ends when the `vc` object
+    // Spawn thread to handle received callback messages.
+    // This thread ends when the `vc` object
     // is dropped, so there is no need for manual cleanup.
     thread::spawn(move || {
         for power in power_receiver {
