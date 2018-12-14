@@ -19,7 +19,7 @@ func main() {
 	// Don't use device before ipcon is connected.
 
 	vc.RegisterPowerCallback(func(power int32) {
-		fmt.Printf("power: %d W\n", float64(power)/1000.0)
+		fmt.Printf("power: %f W\n", float64(power)/1000.0)
 	})
 
 	// Configure threshold for power "greater than 10 W"
