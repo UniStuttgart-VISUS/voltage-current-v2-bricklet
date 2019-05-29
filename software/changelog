@@ -7,5 +7,5 @@
 2018-11-07: 2.0.2 (d6e9f3b)
 - Fix two's complement handling for negative current measurement
 
-2019-05-29: 2.0.3 (TBD)
+2019-05-29: 2.0.3 (088e126)
 - Fix SPITFP IRQ race condition with other higher prio IRQs (through bricklib2)
