@@ -33,7 +33,7 @@ int main(void) {
 	// Register power callback to function cb_power
 	voltage_current_v2_register_callback(&vc,
 	                                     VOLTAGE_CURRENT_V2_CALLBACK_POWER,
-	                                     (void *)cb_power,
+	                                     (void (*)(void))cb_power,
 	                                     NULL);
 
 	// Configure threshold for power "greater than 10 W"

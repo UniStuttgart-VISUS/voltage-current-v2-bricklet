@@ -33,7 +33,7 @@ int main(void) {
 	// Register current callback to function cb_current
 	voltage_current_v2_register_callback(&vc,
 	                                     VOLTAGE_CURRENT_V2_CALLBACK_CURRENT,
-	                                     (void *)cb_current,
+	                                     (void (*)(void))cb_current,
 	                                     NULL);
 
 	// Set period for current callback to 1s (1000ms) without a threshold
