@@ -4,7 +4,7 @@ setup:
 	# Handle incoming power callbacks
 	subscribe to tinkerforge/callback/voltage_current_v2_bricklet/XYZ/power
 	publish '{"register": true}' to tinkerforge/register/voltage_current_v2_bricklet/XYZ/power # Register power callback
-	
+
 	# Configure threshold for power "greater than 10 W"
 	# with a debounce period of 1s (1000ms)
 	publish '{"period": 1000, "value_has_to_change": false, "option": "greater", "min": 10000, "max": 0}' to tinkerforge/request/voltage_current_v2_bricklet/XYZ/set_power_callback_configuration

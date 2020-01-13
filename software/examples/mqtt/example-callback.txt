@@ -4,6 +4,6 @@ setup:
 	# Handle incoming current callbacks
 	subscribe to tinkerforge/callback/voltage_current_v2_bricklet/XYZ/current
 	publish '{"register": true}' to tinkerforge/register/voltage_current_v2_bricklet/XYZ/current # Register current callback
-	
+
 	# Set period for current callback to 1s (1000ms) without a threshold
 	publish '{"period": 1000, "value_has_to_change": false, "option": "off", "min": 0, "max": 0}' to tinkerforge/request/voltage_current_v2_bricklet/XYZ/set_current_callback_configuration
