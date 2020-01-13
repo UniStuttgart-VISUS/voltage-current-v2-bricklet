@@ -26,5 +26,5 @@ if __name__ == "__main__":
     # with a debounce period of 1s (1000ms)
     vc.set_power_callback_configuration(1000, False, ">", 10*1000, 0)
 
-    raw_input("Press key to exit\n") # Use input() in Python 3
+    input("Press key to exit\n") # Use raw_input() in Python 2
     ipcon.disconnect()
