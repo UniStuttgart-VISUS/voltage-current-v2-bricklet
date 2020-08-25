@@ -1,5 +1,3 @@
-
-
 #include "bindings/hal_common.h"
 #include "bindings/bricklet_voltage_current_v2.h"
 
@@ -7,15 +5,12 @@
 
 void check(int rc, const char* msg);
 
-
-
 // Callback function for power callback
 void power_handler(TF_VoltageCurrentV2 *device, int32_t power, void *user_data) {
 	(void)device; (void)user_data; // avoid unused parameter warning
 
 	tf_hal_printf("power: %d 1/%d W\n", power, 1000.0);
 }
-
 
 TF_VoltageCurrentV2 vc;
 
