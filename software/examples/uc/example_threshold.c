@@ -18,16 +18,14 @@ void example_setup(TF_HalContext *hal) {
 	// Create device object
 	check(tf_voltage_current_v2_create(&vc, UID, hal), "create device object");
 
-
 	// Register power callback to function power_handler
 	tf_voltage_current_v2_register_power_callback(&vc,
-	                                             power_handler,
-	                                             NULL);
+	                                              power_handler,
+	                                              NULL);
 
 	// Configure threshold for power "greater than 10 W"
 	// with a debounce period of 1s (1000ms)
 	tf_voltage_current_v2_set_power_callback_configuration(&vc, 1000, false, '>', 10*1000, 0);
-
 }
 
 void example_loop(TF_HalContext *hal) {

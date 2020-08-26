@@ -11,7 +11,6 @@ void example_setup(TF_HalContext *hal) {
 	// Create device object
 	check(tf_voltage_current_v2_create(&vc, UID, hal), "create device object");
 
-
 	// Get current voltage
 	int32_t voltage;
 	check(tf_voltage_current_v2_get_voltage(&vc, &voltage), "get voltage");
@@ -23,7 +22,6 @@ void example_setup(TF_HalContext *hal) {
 	check(tf_voltage_current_v2_get_current(&vc, &current), "get current");
 
 	tf_hal_printf("Current: %d 1/%d A\n", current, 1000.0);
-
 }
 
 void example_loop(TF_HalContext *hal) {
