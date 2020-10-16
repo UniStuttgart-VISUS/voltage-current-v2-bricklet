@@ -23,13 +23,13 @@ void example_setup(TF_HalContext *hal) {
 	int32_t voltage;
 	check(tf_voltage_current_v2_get_voltage(&vc, &voltage), "get voltage");
 
-	tf_hal_printf("Voltage: %d 1/%d V\n", voltage, 1000.0);
+	tf_hal_printf("Voltage: %d 1/%d V\n", voltage, 1000);
 
 	// Get current current
 	int32_t current;
 	check(tf_voltage_current_v2_get_current(&vc, &current), "get current");
 
-	tf_hal_printf("Current: %d 1/%d A\n", current, 1000.0);
+	tf_hal_printf("Current: %d 1/%d A\n", current, 1000);
 }
 
 void example_loop(TF_HalContext *hal) {
