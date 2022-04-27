@@ -1,17 +1,13 @@
 // This example is not self-contained.
-// It requres usage of the example driver specific to your platform.
+// It requires usage of the example driver specific to your platform.
 // See the HAL documentation.
 
-#include "bindings/hal_common.h"
-#include "bindings/bricklet_voltage_current_v2.h"
+#include "src/bindings/hal_common.h"
+#include "src/bindings/bricklet_voltage_current_v2.h"
 
-#define UID "XYZ" // Change XYZ to the UID of your Voltage/Current Bricklet 2.0
-
-void check(int rc, const char* msg);
-
+void check(int rc, const char *msg);
 void example_setup(TF_HAL *hal);
 void example_loop(TF_HAL *hal);
-
 
 // Callback function for current callback
 static void current_handler(TF_VoltageCurrentV2 *device, int32_t current,
@@ -25,7 +21,7 @@ static TF_VoltageCurrentV2 vc;
 
 void example_setup(TF_HAL *hal) {
 	// Create device object
-	check(tf_voltage_current_v2_create(&vc, UID, hal), "create device object");
+	check(tf_voltage_current_v2_create(&vc, NULL, hal), "create device object");
 
 	// Register current callback to function current_handler
 	tf_voltage_current_v2_register_current_callback(&vc,
