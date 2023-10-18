@@ -82,10 +82,14 @@ void communication_init(void);
 #define FID_GET_CONFIGURATION 14
 #define FID_SET_CALIBRATION 15
 #define FID_GET_CALIBRATION 16
+#define FID_GET_POWER_TIME 17
+#define FID_SET_POWER_TIME_CALLBACK_CONFIGURATION 18
+#define FID_GET_POWER_TIME_CALLBACK_CONFIGURATION 19
 
 #define FID_CALLBACK_CURRENT 4
 #define FID_CALLBACK_VOLTAGE 8
 #define FID_CALLBACK_POWER 12
+#define FID_CALLBACK_POWER_TIME 20
 
 typedef struct {
 	TFPMessageHeader header;
@@ -125,24 +129,58 @@ typedef struct {
 	uint16_t current_divisor;
 } __attribute__((__packed__)) GetCalibration_Response;
 
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetPowerTime;
+
+typedef struct {
+	TFPMessageHeader header;
+	int32_t power;
+	uint32_t time;
+} __attribute__((__packed__)) GetPowerTime_Response;
+
+typedef struct {
+	TFPMessageHeader header;
+	bool enable;
+} __attribute__((__packed__)) SetPowerTimeCallbackConfiguration;
+
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetPowerTimeCallbackConfiguration;
+
+typedef struct {
+	TFPMessageHeader header;
+	bool enable;
+} __attribute__((__packed__)) GetPowerTimeCallbackConfiguration_Response;
+
+typedef struct {
+	TFPMessageHeader header;
+	int32_t power;
+	uint32_t time;
+} __attribute__((__packed__)) PowerTime_Callback;
 
 // Function prototypes
 BootloaderHandleMessageResponse set_configuration(const SetConfiguration *data);
 BootloaderHandleMessageResponse get_configuration(const GetConfiguration *data, GetConfiguration_Response *response);
 BootloaderHandleMessageResponse set_calibration(const SetCalibration *data);
 BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetCalibration_Response *response);
+BootloaderHandleMessageResponse get_power_time(const GetPowerTime *data, GetPowerTime_Response *response);
+BootloaderHandleMessageResponse set_power_time_callback_configuration(const SetPowerTimeCallbackConfiguration *data);
+BootloaderHandleMessageResponse get_power_time_callback_configuration(const GetPowerTimeCallbackConfiguration *data, GetPowerTimeCallbackConfiguration_Response *response);
 
 // Callbacks
 bool handle_current_callback(void);
 bool handle_voltage_callback(void);
 bool handle_power_callback(void);
+bool handle_power_time_callback(void);
 
 #define COMMUNICATION_CALLBACK_TICK_WAIT_MS 1
-#define COMMUNICATION_CALLBACK_HANDLER_NUM 3
+#define COMMUNICATION_CALLBACK_HANDLER_NUM 4
 #define COMMUNICATION_CALLBACK_LIST_INIT \
 	handle_current_callback, \
 	handle_voltage_callback, \
 	handle_power_callback, \
+	handle_power_time_callback, \
 
 
 #endif

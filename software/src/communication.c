@@ -32,6 +32,7 @@
 CallbackValue_int32_t callback_value_current;
 CallbackValue_int32_t callback_value_voltage;
 CallbackValue_int32_t callback_value_power;
+bool callback_power_time_enabled = false;
 
 BootloaderHandleMessageResponse handle_message(const void *message, void *response) {
 	switch(tfp_get_fid_from_message(message)) {
@@ -48,6 +49,9 @@ BootloaderHandleMessageResponse handle_message(const void *message, void *respon
 		case FID_GET_CONFIGURATION: return get_configuration(message, response);
 		case FID_SET_CALIBRATION: return set_calibration(message);
 		case FID_GET_CALIBRATION: return get_calibration(message, response);
+		case FID_GET_POWER_TIME: return get_power_time(message, response);
+		case FID_SET_POWER_TIME_CALLBACK_CONFIGURATION: return set_power_time_callback_configuration(message);
+		case FID_GET_POWER_TIME_CALLBACK_CONFIGURATION: return get_power_time_callback_configuration(message, response);
 		default: return HANDLE_MESSAGE_RESPONSE_NOT_SUPPORTED;
 	}
 }
@@ -103,6 +107,27 @@ BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetC
 	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
 }
 
+BootloaderHandleMessageResponse get_power_time(const GetPowerTime *data, GetPowerTime_Response *response) {
+	response->header.length = sizeof(GetPowerTime_Response);
+	response->power = ina226.power;
+	response->time = ina226.power_time;
+
+	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
+}
+
+BootloaderHandleMessageResponse set_power_time_callback_configuration(const SetPowerTimeCallbackConfiguration *data) {
+	callback_power_time_enabled = data->enable;
+
+	return HANDLE_MESSAGE_RESPONSE_EMPTY;
+}
+
+BootloaderHandleMessageResponse get_power_time_callback_configuration(const GetPowerTimeCallbackConfiguration *data, GetPowerTimeCallbackConfiguration_Response *response) {
+	response->header.length = sizeof(GetPowerTimeCallbackConfiguration_Response);
+	response->enable = callback_power_time_enabled;
+
+	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
+}
+
 bool handle_current_callback(void) {
 	return handle_callback_value_callback_int32_t(&callback_value_current, FID_CALLBACK_CURRENT);
 }
@@ -113,6 +138,34 @@ bool handle_voltage_callback(void) {
 
 bool handle_power_callback(void) {
 	return handle_callback_value_callback_int32_t(&callback_value_power, FID_CALLBACK_POWER);
+}
+
+bool handle_power_time_callback(void) {
+	static bool is_buffered = false;
+	static PowerTime_Callback cb;
+	static uint32_t last_time = 0;
+
+	if(!is_buffered) {
+		if(!callback_power_time_enabled || last_time == ina226.power_time) {
+			return false;
+		}
+
+		tfp_make_default_header(&cb.header, bootloader_get_uid(), sizeof(PowerTime_Callback), FID_CALLBACK_POWER_TIME);
+		cb.power = ina226.power;
+		cb.time = ina226.power_time;
+
+		last_time = cb.time;
+	}
+
+	if(bootloader_spitfp_is_send_possible(&bootloader_status.st)) {
+		bootloader_spitfp_send_ack_and_message(&bootloader_status, (uint8_t*)&cb, sizeof(PowerTime_Callback));
+		is_buffered = false;
+		return true;
+	} else {
+		is_buffered = true;
+	}
+
+	return false;
 }
 
 void communication_tick(void) {

@@ -165,6 +165,7 @@ void ina226_tick(void) {
 					case INA226_STATE_READ_CURRENT: {
 						ina226.current = ((((int16_t)((buffer[0] << 8) | buffer[1])) * CURRENT_ADC_MA_MUL) / CURRENT_ADC_MA_DIV) * ina226.cal_c_multiplier / ina226.cal_c_divisor;
 						ina226.power = (ina226.voltage * ina226.current) / 1000;
+						ina226.power_time = system_timer_get_ms();
 						ina226.state = INA226_STATE_READ_MASK;
 						//logd("current: %d\n\r", ina226.current);
 						break;

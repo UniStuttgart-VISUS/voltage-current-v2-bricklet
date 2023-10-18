@@ -88,6 +88,7 @@ typedef struct {
 	int32_t voltage;
 	int32_t current;
 	int32_t power;
+	uint32_t power_time;
 	bool new_calibration;
 	bool new_configuration;
 	bool new_mask;
