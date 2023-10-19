@@ -85,6 +85,7 @@ void communication_init(void);
 #define FID_GET_POWER_TIME 17
 #define FID_SET_POWER_TIME_CALLBACK_CONFIGURATION 18
 #define FID_GET_POWER_TIME_CALLBACK_CONFIGURATION 19
+#define FID_GET_TIME 21
 
 #define FID_CALLBACK_CURRENT 4
 #define FID_CALLBACK_VOLTAGE 8
@@ -159,6 +160,15 @@ typedef struct {
 	uint32_t time;
 } __attribute__((__packed__)) PowerTime_Callback;
 
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetTime;
+
+typedef struct {
+	TFPMessageHeader header;
+	uint32_t time;
+} __attribute__((__packed__)) GetTime_Response;
+
 // Function prototypes
 BootloaderHandleMessageResponse set_configuration(const SetConfiguration *data);
 BootloaderHandleMessageResponse get_configuration(const GetConfiguration *data, GetConfiguration_Response *response);
@@ -167,6 +177,7 @@ BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetC
 BootloaderHandleMessageResponse get_power_time(const GetPowerTime *data, GetPowerTime_Response *response);
 BootloaderHandleMessageResponse set_power_time_callback_configuration(const SetPowerTimeCallbackConfiguration *data);
 BootloaderHandleMessageResponse get_power_time_callback_configuration(const GetPowerTimeCallbackConfiguration *data, GetPowerTimeCallbackConfiguration_Response *response);
+BootloaderHandleMessageResponse get_time(const GetTime *data, GetTime_Response *response);
 
 // Callbacks
 bool handle_current_callback(void);

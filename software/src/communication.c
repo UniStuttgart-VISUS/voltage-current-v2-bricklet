@@ -52,6 +52,7 @@ BootloaderHandleMessageResponse handle_message(const void *message, void *respon
 		case FID_GET_POWER_TIME: return get_power_time(message, response);
 		case FID_SET_POWER_TIME_CALLBACK_CONFIGURATION: return set_power_time_callback_configuration(message);
 		case FID_GET_POWER_TIME_CALLBACK_CONFIGURATION: return get_power_time_callback_configuration(message, response);
+		case FID_GET_TIME: return get_time(message, response);
 		default: return HANDLE_MESSAGE_RESPONSE_NOT_SUPPORTED;
 	}
 }
@@ -124,6 +125,13 @@ BootloaderHandleMessageResponse set_power_time_callback_configuration(const SetP
 BootloaderHandleMessageResponse get_power_time_callback_configuration(const GetPowerTimeCallbackConfiguration *data, GetPowerTimeCallbackConfiguration_Response *response) {
 	response->header.length = sizeof(GetPowerTimeCallbackConfiguration_Response);
 	response->enable = callback_power_time_enabled;
+
+	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
+}
+
+BootloaderHandleMessageResponse get_time(const GetTime *data, GetTime_Response *response) {
+	response->header.length = sizeof(GetTime_Response);
+	response->time = system_timer_get_ms();
 
 	return HANDLE_MESSAGE_RESPONSE_NEW_MESSAGE;
 }
