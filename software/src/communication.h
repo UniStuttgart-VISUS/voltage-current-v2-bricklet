@@ -82,10 +82,23 @@ void communication_init(void);
 #define FID_GET_CONFIGURATION 14
 #define FID_SET_CALIBRATION 15
 #define FID_GET_CALIBRATION 16
+#define FID_GET_CURRENT_TIME 17
+#define FID_SET_CURRENT_TIME_CALLBACK_CONFIGURATION 18
+#define FID_GET_CURRENT_TIME_CALLBACK_CONFIGURATION 19
+#define FID_GET_VOLTAGE_TIME 21
+#define FID_SET_VOLTAGE_TIME_CALLBACK_CONFIGURATION 22
+#define FID_GET_VOLTAGE_TIME_CALLBACK_CONFIGURATION 23
+#define FID_GET_POWER_TIME 25
+#define FID_SET_POWER_TIME_CALLBACK_CONFIGURATION 26
+#define FID_GET_POWER_TIME_CALLBACK_CONFIGURATION 27
+#define FID_GET_TIME 29
 
 #define FID_CALLBACK_CURRENT 4
 #define FID_CALLBACK_VOLTAGE 8
 #define FID_CALLBACK_POWER 12
+#define FID_CALLBACK_CURRENT_TIME 20
+#define FID_CALLBACK_VOLTAGE_TIME 24
+#define FID_CALLBACK_POWER_TIME 28
 
 typedef struct {
 	TFPMessageHeader header;
@@ -125,24 +138,80 @@ typedef struct {
 	uint16_t current_divisor;
 } __attribute__((__packed__)) GetCalibration_Response;
 
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetValueTime;
+
+typedef struct {
+	TFPMessageHeader header;
+	int32_t value;
+	uint32_t time;
+} __attribute__((__packed__)) GetValueTime_Response;
+
+typedef struct {
+	TFPMessageHeader header;
+	bool enable;
+} __attribute__((__packed__)) SetValueTimeCallbackConfiguration;
+
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetValueTimeCallbackConfiguration;
+
+typedef struct {
+	TFPMessageHeader header;
+	bool enable;
+} __attribute__((__packed__)) GetValueTimeCallbackConfiguration_Response;
+
+typedef struct {
+	TFPMessageHeader header;
+	int32_t value;
+	uint32_t time;
+} __attribute__((__packed__)) ValueTime_Callback;
+
+typedef struct {
+	TFPMessageHeader header;
+} __attribute__((__packed__)) GetTime;
+
+typedef struct {
+	TFPMessageHeader header;
+	uint32_t time;
+} __attribute__((__packed__)) GetTime_Response;
+
+typedef struct {
+	bool is_buffered;
+	ValueTime_Callback cb;
+
+	bool enabled;
+	uint32_t last_time;
+} CallbackValueTimeState;
 
 // Function prototypes
 BootloaderHandleMessageResponse set_configuration(const SetConfiguration *data);
 BootloaderHandleMessageResponse get_configuration(const GetConfiguration *data, GetConfiguration_Response *response);
 BootloaderHandleMessageResponse set_calibration(const SetCalibration *data);
 BootloaderHandleMessageResponse get_calibration(const GetCalibration *data, GetCalibration_Response *response);
+BootloaderHandleMessageResponse get_value_time(const GetValueTime *data, GetValueTime_Response *response, const int32_t *value, const uint32_t *time);
+BootloaderHandleMessageResponse set_value_time_callback_configuration(const SetValueTimeCallbackConfiguration *data, CallbackValueTimeState *state);
+BootloaderHandleMessageResponse get_value_time_callback_configuration(const GetValueTimeCallbackConfiguration *data, GetValueTimeCallbackConfiguration_Response *response, CallbackValueTimeState *state);
+BootloaderHandleMessageResponse get_time(const GetTime *data, GetTime_Response *response);
 
 // Callbacks
 bool handle_current_callback(void);
 bool handle_voltage_callback(void);
 bool handle_power_callback(void);
+bool handle_current_time_callback(void);
+bool handle_voltage_time_callback(void);
+bool handle_power_time_callback(void);
 
 #define COMMUNICATION_CALLBACK_TICK_WAIT_MS 1
-#define COMMUNICATION_CALLBACK_HANDLER_NUM 3
+#define COMMUNICATION_CALLBACK_HANDLER_NUM 6
 #define COMMUNICATION_CALLBACK_LIST_INIT \
 	handle_current_callback, \
 	handle_voltage_callback, \
 	handle_power_callback, \
+	handle_current_time_callback, \
+	handle_voltage_time_callback, \
+	handle_power_time_callback, \
 
 
 #endif
